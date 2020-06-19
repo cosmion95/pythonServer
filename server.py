@@ -28,9 +28,10 @@ server.bind(ADDR)
 #declar o lista cu posibili utilizatori - accestia sunt toti utilizatorii
 users = [
     ("1", "Cosmin"),
-    ("2", "Alin"),
-    ("3", "Nico")
+    ("2", "Ionel"),
+    ("3", "Gheorghe")
 ]
+
 
 
 def handle_client(conn, addr):
@@ -40,6 +41,7 @@ def handle_client(conn, addr):
     authenticated = False
     connected = True
     while connected:
+
         msg = conn.recv(HEADER).decode(FORMAT)
         if msg:
             print(f"received a new message: {msg}" + " //the end")
@@ -51,9 +53,11 @@ def handle_client(conn, addr):
                         print("connected with user: " + u[1])
                         connectedUser = ((u[0], u[1]), (conn, addr))
                         authenticated = True
+                        user = u
                         conn.send(AUTH_SUCCESS.encode(FORMAT))
                         connectedUsers.append((u, (conn, addr)))
                         #trimit lista cu toti utilizatorii
+                        time.sleep(0.1)
                         conn.send(CONTACTS_START.encode(FORMAT))
                         time.sleep(0.1)
                         users_item = ""
@@ -72,13 +76,40 @@ def handle_client(conn, addr):
                             conn.send(users_item.encode(FORMAT))
                             time.sleep(0.1)
                         conn.send(CONTACTS_FINISH.encode(FORMAT))
-                        print("Currently connected users: ")
-                        for c in connectedUsers:
-                            print(c)
                 if not authenticated:
                     print("user not found, sending message to client")
                     conn.send(AUTH_FAIL.encode(FORMAT))
                     authenticated = True
+            else:
+                #trimit mesajul catre destinatar
+                #obtin destinatarul din mesajul primit
+                msgUser = msg.split("~~~")
+                message = msgUser[0].strip()
+                userID = msgUser[1].split("@@@")[0].strip()
+                userName = msgUser[1].split("@@@")[1].strip()
+
+                #formez mesajul de trimis
+                messageToSend = message + " ~~~ " + user[0] + " @@@ " + user[1]
+                print("Prepared message to be sent: " + messageToSend)
+
+                isConnected = False
+
+                #verific daca este conectat
+                for c in connectedUsers:
+                    if c[0][0] == userID:
+                        print("found a connected user matching the same id: " + c[0][0] + " " + c[0][1])
+                        #print("sending the message to " + c[1][0])
+                        #daca este conectat, trimit catre toate conexiunile
+                        thread = threading.Thread(target=send_messages, args=(messageToSend, c[1][0], c[1][1]))
+                        thread.start()
+                        isConnected = True
+                
+
+                #il adaug in lista de mesaje care trebuie trimise cand se conecteaza
+
+            print("Currently connected users: ")
+            for c in connectedUsers:
+                print(c[0])
 
 
             if msg == DISCONNECT_MESSAGE:
@@ -98,13 +129,13 @@ def start():
         thread = threading.Thread(target=handle_client, args=(conn, addr))
         thread.start()
 
-def send_message(msg, conn, addr):
-    message = msg.encode(FORMAT)
-    msg_length = len(message)
-    send_length = str(msg_length).encode(FORMAT)
-    send_length += b' ' * (HEADER - len(send_length))
-    conn.send(send_length)
-    conn.send(message)
+def send_messages(msg, conn, addr):
+        message = msg.encode(FORMAT)
+        conn.send(message)
+        time.sleep(10)
+
+
+
 
 print("Starting server...")
 start()
