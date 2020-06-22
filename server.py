@@ -8,13 +8,14 @@ PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
-DISCONNECT_MESSAGE = "DISCONNECT"
-AUTH_SUCCESS = "USER_AUTHENTICATED"
-AUTH_FAIL = "USER_NOT_AUTHENTICATED"
-MSG_SIZE = 100
-CONTACTS_START = "CONTACTS_LIST_STARTED"
-CONTACTS_FINISH = "CONTACTS_LIST_FINISHED"
+MSG_SIZE = 1000
 CONTACT_LIST_ITEM = 10000
+
+DISCONNECT_MESSAGE = "Yo2HFHZOy1AgdcFNt0mgX8NYZELlsAATOrzd"
+AUTH_SUCCESS = "kei7tLQ8PsjS4BFQsrpFKp7OhrQ8CWf9zolc"
+AUTH_FAIL = "gXaLWkHQ5wbqLM0klsogVLE4o1TVJenhrj8Y"
+CONTACTS_START = "2sRulLdVeOfIWNuIyW9i4pfBVWa8kCfTa6Yf"
+CONTACTS_FINISH = "8n10TwuJPr9j4a4y1uc4z9XltbAZL1FuzlYF"
 
 print(SERVER)
 
@@ -31,17 +32,32 @@ server.bind(ADDR)
 users = [
     ("1", "Cosmin"),
     ("2", "Ionel"),
-    ("3", "Gheorghe")
+    ("3", "Gheorghe"),
+    ("4", "Vasile"),
+    ("5", "Mihai"),
+    ("6", "Andrei"),
+    ("7", "Mircea"),
+    ("8", "Nicoleta"),
+    ("9", "Paul"),
+    ("10", "Stefana"),
+    ("11", "Sergiu"),
+    ("12", "Gabriel"),
+    ("13", "Maria"),
+    ("14", "Alexandra"),
+    ("15", "Daniel"),   
+    ("16", "Ana"),
+    ("17", "Mobutusesesecocucucucungbenguvazabanga")
 ]
 
 def handle_client(conn, addr):
     print(f"new connection from adress: {addr} established")
+    print(f"CONN: {conn}")
     connectedUser = (())
     user = ''
     authenticated = False
     connected = True
     while connected:
-        msg = conn.recv(HEADER).decode(FORMAT)
+        msg = conn.recv(MSG_SIZE).decode(FORMAT)
         if msg:
             if msg == DISCONNECT_MESSAGE:
                 print("Disconnect signal received. Ending connection...")
